@@ -2,9 +2,10 @@
 import { assets } from "@/assets/assets"
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import axios from "axios"
 import toast from "react-hot-toast"
 import Loading from "@/components/Loading"
-import {useUser} from "@clerk/nextjs"
+import {useUser, useAuth} from "@clerk/nextjs"
 import {useRouter} from "next/navigation"
 
 export default function CreateStore() {
