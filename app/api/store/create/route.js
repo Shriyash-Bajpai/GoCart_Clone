@@ -6,21 +6,6 @@ import prisma from '@/lib/prisma';
 import fs from 'fs/promises';
 import path from 'path';
 
-// Register a non-crashing unhandledRejection handler in development to avoid process exit
-if (process && process.env && process.env.NODE_ENV !== 'production' && typeof process.on === 'function') {
-    try {
-        const existing = process.listeners && process.listeners('unhandledRejection');
-        if (!existing || existing.length === 0) {
-            process.on('unhandledRejection', (reason) => {
-                console.error('Unhandled Rejection (dev):', reason);
-            });
-        }
-    } catch (e) {
-        // ignore safely
-    }
-}
-
-
 export async function POST(request) {
     try{
         const {userId} = getAuth(request);
@@ -108,23 +93,16 @@ export async function POST(request) {
 
         const newStore=await prisma.store.create({
             data:{
-                userId:userId,
-                name:name,
-                username:username.toLowerCase(),
-                description:description,
-                email:email,
-                contact:contact,
-                address:address,
-                logo: optImg,
-            }
-        });
-
-        await prisma.user.update({
-            where:{id:userId},
-            data:{
-                store:{
-                    connect:{id:newStore.id}
-                }
+                // connect the existing user by id instead of relying on separate update
+                user: { connect: { id: userId } },
+                name: name,
+                username: username.toLowerCase(),
+                description: description,
+                email: email,
+                contact: contact,
+                address: address,
+                // schema requires logo (non-nullable) — provide empty string when missing
+                logo: optImg || '',
             }
         });
 
