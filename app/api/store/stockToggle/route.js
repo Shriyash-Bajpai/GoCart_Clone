@@ -1,7 +1,7 @@
 //toggle the the stock for a particular product in the store
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getAuth } from '@clerk/nextjs/dist/types/server';
+import prisma from '@/lib/prisma';
+import { getAuth } from '@clerk/nextjs/server';
 import authSeller from '@/middlewares/authSeller';
 
 export async function POST(request){

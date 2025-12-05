@@ -1,8 +1,8 @@
 // check if the user is a seller
 import { NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
-import { prisma } from "@/configs/prisma";
-import { authSeller } from "@/utils/authSeller";
+import { prisma } from "@/lib/prisma";
+import { authSeller } from "@/middlewares/authSeller";
 
 export async function POST(request) {
     try{
