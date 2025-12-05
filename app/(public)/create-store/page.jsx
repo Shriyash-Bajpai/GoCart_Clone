@@ -4,14 +4,14 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import toast from "react-hot-toast"
 import Loading from "@/components/Loading"
-import {useUser, useAuth} from "@clerk/nextjs"
+import {useUser} from "@clerk/nextjs"
 import {useRouter} from "next/navigation"
 
 export default function CreateStore() {
 
     const {user}=useUser();
     const router=useRouter();
-    const {getToken} = useAuth();
+    const {getToken}=useAuth();
 
     const [alreadySubmitted, setAlreadySubmitted] = useState(false)
     const [status, setStatus] = useState("")
@@ -37,11 +37,9 @@ export default function CreateStore() {
         const token=await getToken();
         try{
 
-            const res = await fetch('/api/store/create', {
-                method: 'GET',
-                credentials: 'same-origin',
-            });
-            const data = await res.json();
+            const {data}=await axios.get('/api/store/create',
+                {headers:{Authorization: `Bearer ${token}`}}
+            );
 
             if(['approved', 'rejected', 'pending'].includes(data.status)){
                 setStatus(data.status);
@@ -87,13 +85,10 @@ export default function CreateStore() {
             formData.append("address",storeInfo.address);
             formData.append("image",storeInfo.image);
 
-            const res = await fetch('/api/store/create', {
-                method: 'POST',
-                credentials: 'same-origin',
-                body: formData,
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || data.message || 'Failed to create store');
+            const {data}=await axios.post('/api/store/create',formData,
+                {headers:{Authorization: `Bearer ${token}`}} 
+            );
+            
             toast.success(data.message);
             await fetchSellerStatus();
         }

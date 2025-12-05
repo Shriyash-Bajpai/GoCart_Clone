@@ -1,7 +1,7 @@
 import { getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import client from '@/configs/imageKit';
-import prisma from '@/lib/prisma';
+import { client } from '@/configs/imageKit';
+import prisma from '@lib/client';
 import authSeller from '@/middlewares/authSeller';
 
 //Add a new product

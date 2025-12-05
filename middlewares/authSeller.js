@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '@lib/client';
 
 const authSeller= async(userId)=>{
 

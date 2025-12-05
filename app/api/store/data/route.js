@@ -1,7 +1,7 @@
 // Get store info and store products
 
 import authSeller from "@/middlewares/authSeller";
-import prisma from '@/lib/prisma';
+import { getAuth } from "@clerk/nextjs/dist/types/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request){
