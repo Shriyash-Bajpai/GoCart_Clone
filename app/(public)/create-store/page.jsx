@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import toast from "react-hot-toast"
 import Loading from "@/components/Loading"
-import {useUser} from "@clerk/nextjs"
+import {useUser, useAuth} from "@clerk/nextjs"
+import axios from 'axios'
 import {useRouter} from "next/navigation"
 
 export default function CreateStore() {
