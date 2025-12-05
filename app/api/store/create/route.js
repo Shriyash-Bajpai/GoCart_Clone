@@ -6,12 +6,17 @@ import prisma from '@/lib/prisma';
 import fs from 'fs/promises';
 import path from 'path';
 
-// Register a non-crashing unhandledRejection handler in dev to avoid process exit
-if (typeof process !== 'undefined' && process && typeof process.on === 'function') {
-    if ((process.listeners && process.listeners('unhandledRejection').length === 0) || !process.listeners) {
-        process.on('unhandledRejection', (reason, promise) => {
-            console.error('Unhandled Rejection (caught at top-level):', reason);
-        });
+// Register a non-crashing unhandledRejection handler in development to avoid process exit
+if (process && process.env && process.env.NODE_ENV !== 'production' && typeof process.on === 'function') {
+    try {
+        const existing = process.listeners && process.listeners('unhandledRejection');
+        if (!existing || existing.length === 0) {
+            process.on('unhandledRejection', (reason) => {
+                console.error('Unhandled Rejection (dev):', reason);
+            });
+        }
+    } catch (e) {
+        // ignore safely
     }
 }
 
@@ -55,12 +60,12 @@ export async function POST(request) {
             }
             try {
                 const imgBuffer = Buffer.from(await image.arrayBuffer());
-                const response = client.files.upload({
+                const response = await client.files.upload({
                     file: imgBuffer,
                     fileName: image.name,
                     folder: "logos",
                 });
-                console.log(response);
+                console.log('ImageKit response:', response);
 
                 optImg = client.helper.buildSrc({
                     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/shriyash',
@@ -86,7 +91,7 @@ export async function POST(request) {
                     console.warn('Saved image locally to', filePath);
                 } catch (fsErr) {
                     console.error('Local save fallback failed:', fsErr);
-                    return NextResponse.json({ error: uploadError.message || 'Image upload failed' }, { status: 400 });
+                    return NextResponse.json({ error: uploadError?.message || 'Image upload failed' }, { status: 400 });
                 }
             }
         }
@@ -115,11 +120,11 @@ export async function POST(request) {
             }
         });
 
-        return NextResponse.json({message:"applied waiting for approval",});
+        return NextResponse.json({ message: "applied waiting for approval", store: newStore }, { status: 201 });
         
-    }catch(error){
-        console.log("Error in creating store:",error);
-        return NextResponse.json({error: error.code || error.message},{status:400});
+    } catch (error) {
+        console.error("Error in creating store:", error);
+        return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
     }
 }
 
