@@ -6,7 +6,6 @@ import authSeller from '@/middlewares/authSeller';
 
 //Add a new product
 
-import { NextResponse } from 'next/server';
 
 export async function POST(request) {
     try{
