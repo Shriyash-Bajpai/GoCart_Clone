@@ -78,20 +78,28 @@ export async function POST(request) {
                 });
             } catch (uploadError) {
                 console.error('Image upload failed:', uploadError);
-                // Fallback: save to /public/uploads for local development so the rest of the flow can continue
-                try {
-                    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-                    await fs.mkdir(uploadsDir, { recursive: true });
-                    const safeName = (image && image.name) ? image.name.replace(/[^a-zA-Z0-9._-]/g, '_') : 'upload';
-                    const filename = `${Date.now()}-${safeName}`;
-                    const filePath = path.join(uploadsDir, filename);
-                    const buffer = Buffer.from(await image.arrayBuffer());
-                    await fs.writeFile(filePath, buffer);
-                    optImg = `/uploads/${filename}`;
-                    console.warn('Saved image locally to', filePath);
-                } catch (fsErr) {
-                    console.error('Local save fallback failed:', fsErr);
-                    return NextResponse.json({ error: uploadError?.message || 'Image upload failed' }, { status: 400 });
+                // If running in production/serverless (Vercel) we cannot write to disk.
+                const isServerless = !!process.env.VERCEL || process.env.NODE_ENV === 'production';
+                if (isServerless) {
+                    // Skip saving locally in serverless environments — continue without logo.
+                    console.warn('ImageKit upload failed in production/serverless. Skipping logo. Set IMAGEKIT_PUBLIC_KEY/IMAGEKIT_PRIVATE_KEY/IMAGEKIT_URL_ENDPOINT on Vercel to enable uploads.');
+                    optImg = null;
+                } else {
+                    // Local dev fallback: save to /public/uploads so app can continue.
+                    try {
+                        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+                        await fs.mkdir(uploadsDir, { recursive: true });
+                        const safeName = (image && image.name) ? image.name.replace(/[^a-zA-Z0-9._-]/g, '_') : 'upload';
+                        const filename = `${Date.now()}-${safeName}`;
+                        const filePath = path.join(uploadsDir, filename);
+                        const buffer = Buffer.from(await image.arrayBuffer());
+                        await fs.writeFile(filePath, buffer);
+                        optImg = `/uploads/${filename}`;
+                        console.warn('Saved image locally to', filePath);
+                    } catch (fsErr) {
+                        console.error('Local save fallback failed:', fsErr);
+                        return NextResponse.json({ error: uploadError?.message || 'Image upload failed' }, { status: 400 });
+                    }
                 }
             }
         }
