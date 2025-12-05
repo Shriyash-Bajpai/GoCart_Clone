@@ -1,7 +1,8 @@
 //Function for creating the store 
 import {getAuth} from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import {client} from "@/configs/imageKit";
+import client from "@/configs/imageKit";
+import prisma from '@/lib/prisma';
 
 
 export async function POST(request) {

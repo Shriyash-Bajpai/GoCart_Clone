@@ -1,21 +1,17 @@
 // check if the user is a seller
 import { NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
-import { prisma } from "@/configs/prisma";
-import { authSeller } from "@/utils/authSeller";
+import prisma from '@/lib/prisma';
+import authSeller from "@/middlewares/authSeller";
 
 export async function POST(request) {
     try{
         const {userId}=getAuth(request);
-        const storeId=authSeller(userId);
+        const storeId = await authSeller(userId);
         if(storeId)
-            return NextResponse.json({message:"The user is a authorized seller"},{storeId:res});
-        
+            return NextResponse.json({ message: "The user is an authorized seller", storeId }, { status: 200 });
 
-        const store=await prisma.store.findFirst({
-            where:{userId:userId, storeId:storeId}
-        });
-        return NextResponse.json({message:"The user is a authorised seller"},{storeId:storeId},{store:store});
+        return NextResponse.json({ message: "Not an authorized seller" }, { status: 401 });
 
     }
     catch(error){
