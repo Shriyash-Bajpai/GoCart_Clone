@@ -7,6 +7,8 @@ import AdminNavbar from "./AdminNavbar"
 import AdminSidebar from "./AdminSidebar"
 import { useUser } from "@clerk/nextjs"
 import { useAuth } from "@clerk/clerk-react"
+import axios from "axios"
+
 
 const AdminLayout = ({ children }) => {
 
