@@ -10,7 +10,7 @@ export const authAdmin = async(userId) => {
         const client=await clerkClient();
         const user=await prisma.user.findFirst({
             where:{
-                userId:userId,
+                id:userId,
             }
         });
 

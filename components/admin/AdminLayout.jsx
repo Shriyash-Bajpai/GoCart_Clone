@@ -20,7 +20,7 @@ const AdminLayout = ({ children }) => {
 
     const fetchIsAdmin = async () => {
         try{
-
+            const token=await getToken();
             const res=await axios.get("/api/admin/isAdmin",{
                 headers:{Authorization:`Bearer ${token}`}
             });
