@@ -1,4 +1,6 @@
+import StoreProvider from "@/app/StoreProvider";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { SignedIn, SignedOut,SignIn } from "@clerk/nextjs";
 
 export const metadata = {
     title: "GoCart. - Admin",
@@ -9,9 +11,17 @@ export default function RootAdminLayout({ children }) {
 
     return (
         <>
-            <AdminLayout>
-                {children}
-            </AdminLayout>
+            <SignedIn>
+                <AdminLayout>
+                    {children}
+                </AdminLayout>
+            </SignedIn>
+
+            <SignedOut>
+                <div className="min-h-screen flex items-center justify-center">
+                    <SignIn fallbackredirectUrl="/admin" routing="hash" />
+                </div>
+            </SignedOut>
         </>
     );
 }
