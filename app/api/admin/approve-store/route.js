@@ -5,6 +5,8 @@ import prisma from "@/lib/prisma";
 import {authAdmin} from "@/middlewares/authAdmin";
 
 
+
+// update the selected store
 export async function POST(request){
     try{
 
@@ -21,7 +23,7 @@ export async function POST(request){
                 where:{id:storeId},
                 data:{
                     status:"approved",
-                    isActive:"true",
+                    isActive:true,
                 }
             });
         }
@@ -34,7 +36,7 @@ export async function POST(request){
             });
         }
 
-        return NextResponse.json({message:status+" successfullly"},{status:200});
+        return NextResponse.json({message:`${status} successfully`},{status:200});
         
 
     }catch(error){

@@ -4,21 +4,53 @@ import StoreInfo from "@/components/admin/StoreInfo"
 import Loading from "@/components/Loading"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
+import { useAuth } from "@clerk/nextjs"
+import axios from "axios";
 
 export default function AdminApprove() {
 
     const [stores, setStores] = useState([])
     const [loading, setLoading] = useState(true)
 
+    const {getToken}=useAuth();
 
+    // fetch list of unapporved stores
     const fetchStores = async () => {
-        setStores(storesDummyData)
-        setLoading(false)
+        try{
+            const token=await getToken();
+            const storelist=await axios.get("/api/admin/approve-store",{
+                headers:{Authorization:`Bearer ${token}`}
+            });
+            //console.log(storelist);
+            setStores(storelist.data.list);
+        }catch(error){
+            console.log("Error in page in approve in admin in fetching the unapproved stores");
+            console.log(error);
+            toast.error(error?.response?.data?.error || error.message);
+        }finally{
+            setLoading(false)
+        }
     }
 
     const handleApprove = async ({ storeId, status }) => {
         // Logic to approve a store
+        try{
+            const token=await getToken();
+            const approved=await axios.post("/api/admin/approve-store",
+                {storeId,status},
+                {
+                headers:{Authorization:`Bearer ${token}`}
+                });
+            
+            //console.log(approved.data.message);
+            toast.success(approved.data.message);
+            await fetchStores();
 
+        }catch(error){
+            console.log("Error in page in approve in admin in approving logic");
+            console.log(error);
+            toast.error(error?.response?.data?.error || error.message);
+        }
 
     }
 

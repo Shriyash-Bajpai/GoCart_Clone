@@ -16,6 +16,7 @@ export async function POST(request){
         if(!isAdmin)
             return NextResponse.json({error:"User is not admin"},{status:401});
 
+        console.log(request);
         const {storeId}=await request.json();
 
         if(!storeId)

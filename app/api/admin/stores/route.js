@@ -6,7 +6,7 @@ import {authAdmin} from "@/middlewares/authAdmin";
 
 
 
-// Get all approved requests
+// Get all approved stores
 export async function GET(request){
 
     try{

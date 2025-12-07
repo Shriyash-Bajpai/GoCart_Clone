@@ -29,7 +29,7 @@ export async function GET(request){
         });
 
         let rev=0;
-        ordersList.map((item)=>{
+        orderList.map((item)=>{
             rev+=item.total
         });
         rev=rev.toFixed(2);
@@ -45,6 +45,8 @@ export async function GET(request){
             rev,
             orderList,
         };
+
+        return NextResponse.json(dashboardData);
 
     }catch(error){
         console.log("Error in dashboard",error);

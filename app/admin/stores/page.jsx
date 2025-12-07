@@ -4,25 +4,60 @@ import StoreInfo from "@/components/admin/StoreInfo"
 import Loading from "@/components/Loading"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
+import axios from"axios";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 export default function AdminStores() {
 
+    const {user}=useUser();
+
     const [stores, setStores] = useState([])
     const [loading, setLoading] = useState(true)
+    const {getToken}=useAuth();
 
     const fetchStores = async () => {
-        setStores(storesDummyData)
-        setLoading(false)
+        try{
+            const token=await getToken();
+            const stores=await axios.get("/api/admin/stores",{
+                header:{Authorization:`Bearer ${token}`}
+            });
+            //console.log(stores);
+
+            setStores(stores.data.list);
+        }catch(error){
+            console.log("Error in page in approve in admin in fetching the approved stores");
+            console.log(error);
+            toast.error(error?.response?.data?.error || error.message);
+        }finally{
+            setLoading(false);
+        }
     }
 
     const toggleIsActive = async (storeId) => {
         // Logic to toggle the status of a store
-
+        try{
+            const token=await getToken();
+            const stores=await axios.post("/api/admin/toogle-store",
+                {storeId},
+                {
+                header:{Authorization:`Bearer ${token}`}
+                });
+            
+            await fetchStores();
+            toast.success(stores.data.message);
+            //console.log(stores);
+            
+        }catch(error){
+            console.log("Error in page in approve in admin in toggling the status of approved stores");
+            console.log(error);
+            toast.error(error?.response?.data?.error || error.message);
+        }
     }
 
     useEffect(() => {
-        fetchStores()
-    }, [])
+        if(user)
+            fetchStores()
+    }, [user])
 
     return !loading ? (
         <div className="text-slate-500 mb-28">
