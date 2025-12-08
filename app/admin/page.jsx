@@ -5,14 +5,14 @@ import OrdersAreaChart from "@/components/OrdersAreaChart"
 import { CircleDollarSignIcon, ShoppingBasketIcon, StoreIcon, TagsIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import axios from "axios";
-import { useUser } from "@clerk/nextjs"
+import { useAuth } from "@clerk/nextjs"
 import toast from "react-hot-toast"
 
 export default function AdminDashboard() {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
 
-    const {getToken}=useUser();
+    const {getToken}=useAuth();
 
 
     const [loading, setLoading] = useState(true)
@@ -38,7 +38,10 @@ export default function AdminDashboard() {
                 headers:{Authorization:`Bearer ${token}`}
             }
             );
-            setDashboardData(data.dashboardData);
+
+            console.log("Dashboard data received:", data);
+            
+            setDashboardData(data);
 
         }catch(error){
             console.log("Error in admin page.jsx");

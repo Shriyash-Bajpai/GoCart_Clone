@@ -38,15 +38,15 @@ export async function GET(request){
         const prod=await prisma.product.count();
 
 
-        const dashboardData={
-            orders,
-            stores,
-            prod,
-            rev,
-            orderList,
+        const dashData={
+            orders:orders,
+            stores:stores,
+            products:prod,
+            revenue:rev,
+            allOrders:orderList,
         };
 
-        return NextResponse.json(dashboardData);
+        return NextResponse.json(dashData);
 
     }catch(error){
         console.log("Error in dashboard",error);
