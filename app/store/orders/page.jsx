@@ -5,6 +5,7 @@ import { orderDummyData } from "@/assets/assets"
 import toast from "react-hot-toast"
 import axios from "axios"
 import { useAuth } from "@clerk/nextjs"
+import prisma from "@/lib/prisma"
 
 export default function StoreOrders() {
     const {getToken}=useAuth();
@@ -40,7 +41,7 @@ export default function StoreOrders() {
                 headers:{Authorization:`Bearer ${token}`}
             });
 
-            setOrders(prev=>prev.map(order=>order.id===orderId ? {...order,status} : order));
+            setOrders(prev => prev.map(order => order.id === orderId ? { ...order, status } : order));
             toast.success("Order status updated");
 
         }catch(error){
