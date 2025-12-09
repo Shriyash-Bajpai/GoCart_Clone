@@ -12,7 +12,9 @@ const authSeller= async(userId)=>{
         if(!user)
             return false;
 
-        if(user.store.status==='APPROVED')
+        //console.log(user.store);
+
+        if(user.store.status.toUpperCase()==='APPROVED')
             return user.store.id;
         else
             return false;

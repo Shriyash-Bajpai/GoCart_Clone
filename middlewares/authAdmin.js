@@ -13,8 +13,9 @@ export const authAdmin = async(userId) => {
                 id:userId,
             }
         });
-
-        const email=user.email;
+        if(!user)
+            return false;
+        const email=user.email.toLowerCase();
         if(process.env.ADMIN_EMAIL.split(',').includes(email))
             return user;
         else    

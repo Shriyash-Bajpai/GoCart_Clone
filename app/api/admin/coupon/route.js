@@ -3,6 +3,7 @@ import { authAdmin } from "@/middlewares/authAdmin";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import {search} from "@/middlewares/search-coupon";
+import {inngest} from "@/inngest/client";
 
 //Add new coupon
 export async function POST(request){
@@ -23,6 +24,15 @@ export async function POST(request){
 
         await prisma.coupon.create({
             data:coupon,
+        }).then(async(coupon)=>{
+            // Run inngest scheduler function to delete coupon on expire
+            await inngest.send({
+                name:"app/coupon.expired",
+                data:{
+                    code:coupon.code,
+                    expires_at:coupon.expiresAt
+                }
+            })
         });
 
         return NextResponse.json({message:"Coupon created successfully"},{status:200});
@@ -47,11 +57,13 @@ export async function DELETE(request){
             return NextResponse.json({message:"User not authorized"},{status:401});
 
         const url=new URL(request.url);
-        const couponId=url.searchParams.get('id');
+        const couponId=url.searchParams.get('code');
+        console.log(couponId);
 
-        OR 
-        const {searchParams}=request.nextUrl;
-        const code=searchParams.get('code');
+        // OR 
+        // const {searchParams}=request.nextUrl;
+        // const code=searchParams.get('code');
+        // console.log(code);
 
         const isValid=await prisma.coupon.findFirst({
             where:{code:couponId}

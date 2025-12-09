@@ -9,14 +9,16 @@ import {authAdmin} from "@/middlewares/authAdmin";
 export async function GET(request){
 
     try{
-        const {userId}=getAuth(request);
-
+        const {userId}=await getAuth(request);
+        console.log(userId);
         const isAdmin=await authAdmin(userId);
         
-        if(isAdmin)
-            return NextResponse.json({isAdmin});
-        else
-            return NextResponse.json({error:"Not Authorized"},{status:401});
+        // if(isAdmin)
+        //     return NextResponse.json({isAdmin});
+        // else
+        //     return NextResponse.json({error:"Not Authorized"},{status:401});
+        // console.log(isAdmin);
+        return NextResponse.json({isAdmin});
 
     }catch(error){
         console.log("Error in isAdmin");

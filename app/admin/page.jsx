@@ -40,8 +40,8 @@ export default function AdminDashboard() {
             );
 
             console.log("Dashboard data received:", data);
-            
-            setDashboardData(data);
+            if(data)
+                setDashboardData(data);
 
         }catch(error){
             console.log("Error in admin page.jsx");

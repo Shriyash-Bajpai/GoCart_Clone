@@ -21,10 +21,11 @@ const AdminLayout = ({ children }) => {
     const fetchIsAdmin = async () => {
         try{
             const token=await getToken();
-            const res=await axios.get("/api/admin/isAdmin",{
+            const {data}=await axios.get("/api/admin/isAdmin",{
                 headers:{Authorization:`Bearer ${token}`}
             });
-            setIsAdmin(res.data);
+            // console.log(data);
+            setIsAdmin(data.isAdmin);
         }catch(error){
             console.log("Error in fetchIsAdmin in AdminLayout.jsx");
             console.log(error);

@@ -12,7 +12,7 @@ export async function GET(request){
 
         const {userId}=getAuth(request);
         const isAdmin=await authAdmin(userId);
-
+        // console.log(isAdmin);
         if(!isAdmin)
             return NextResponse.json({error:"User is not admin"},{status:401});
 
