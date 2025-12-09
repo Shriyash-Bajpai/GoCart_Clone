@@ -4,28 +4,66 @@ import { toast } from "react-hot-toast"
 import Image from "next/image"
 import Loading from "@/components/Loading"
 import { productDummyData } from "@/assets/assets"
+import { useAuth } from "@clerk/clerk-react"
+import axios from "axios"
+import { useUser } from "@clerk/clerk-react"
 
 export default function StoreManageProducts() {
 
+    const {getToken}=useAuth()
+    const {user}=useUser();
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
 
     const [loading, setLoading] = useState(true)
     const [products, setProducts] = useState([])
 
     const fetchProducts = async () => {
-        setProducts(productDummyData)
-        setLoading(false)
+        try{
+            
+            const token=await getToken();
+            const {data}=await axios.get("/api/store/product",{
+                headers:{Authorization:`Bearer ${token}`},
+            });
+            //console.log(data);
+            setProducts(data.products.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)));
+
+        }catch(error){
+            console.log("Error in manage-product page");
+            console.log(error);
+            toast.error("Error in displaying the products");
+        }finally{
+            setLoading(false);
+        }
     }
 
     const toggleStock = async (productId) => {
         // Logic to toggle the stock of a product
-
+        try{
+            const token=await getToken();
+            const formData = new FormData();
+            formData.append("productId",productId);
+            const {data}=await axios.post("/api/store/stockToggle",formData,{
+                headers:{Authorization:`Bearer ${token}`,
+                "Content-Type": "multipart/form-data"},
+            });
+            setProducts(prevProducts=>prevProducts.map(product=> product.id===productId ? {...product,inStock:!product.inStock} : product));
+            
+            toast.success("Stock Toggled");
+            
+        }catch(error){
+            
+            console.log("Error in manage-product page");
+            console.log(error);
+            toast.error("Error in toggling the stock of products");
+        }
 
     }
 
     useEffect(() => {
+        if(user){
             fetchProducts()
-    }, [])
+        }
+    }, [user])
 
     if (loading) return <Loading />
 

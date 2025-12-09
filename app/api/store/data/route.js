@@ -4,6 +4,7 @@ import authSeller from "@/middlewares/authSeller";
 import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from "next/server";
 
+//get all the product of the current seller
 export async function GET(request){
     try{
 

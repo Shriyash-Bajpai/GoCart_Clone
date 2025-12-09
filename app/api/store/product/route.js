@@ -4,6 +4,7 @@ import { client } from '@/configs/imageKit';
 import prisma from '@/lib/prisma';
 import authSeller from '@/middlewares/authSeller';
 
+
 //Add a new product
 
 export async function POST(request) {
@@ -11,23 +12,34 @@ export async function POST(request) {
 
         const {userId} = getAuth(request);
         const storeId=await authSeller(userId);
-        if(!storeId)
+        if(!storeId || typeof storeId!=="string")
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const formData = await request.formData();
 
-        const {name,description,mrp,price,images,category,inStock}=JSON.parse(formData.get("data"));
-        if(!name || !description || !mrp || !price || !images || images.length===0 || !category || !inStock)
+
+        const {name,description,mrp,price,category,inStock}=JSON.parse(formData.get("data"));
+        const images=formData.getAll('images');
+        //console.log("Received data:", {name, description, mrp, price, category, inStock, imagesCount: images.length});
+        if(!name || !description || mrp===undefined || price===undefined || !images || !category )
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+
+        // console.log("IMAGES FROM FORMDATA:", formData.getAll("images"));
+        // console.log("DATA JSON:", formData.get("data"));
 
 
         const optImgs=[];
         for(const image of images){
             const imgBuffer=Buffer.from(await image.arrayBuffer());
+            const mimeType = image?.type || 'image.png';
+            const fileName = image?.name || 'logo.png';
+            const base64=imgBuffer.toString('base64');
+            const dataUrl=`data:${mimeType};base64,${base64}`;
                     const response = await client.files.upload({
-                        file: imgBuffer,  // or other allowed file formats/streams
-                        fileName: image.name,
+                        file: dataUrl,  // or other allowed file formats/streams
+                        fileName: fileName,
                         folder:"logos",
                     });
-                    console.log(response);
+                    //console.log(response);
             
             
             
@@ -44,15 +56,19 @@ export async function POST(request) {
                     optImgs.push(optImg);
         }
 
+        const parsedMrp = parseFloat(mrp);
+        const parsedPrice = parseFloat(price);
+        const parsedStock = inStock === "true" || inStock === true;
+
         const prod=await prisma.product.create({
             data:{
                 name:name,
                 description:description,
-                mrp:mrp,
-                price:price, 
+                mrp:parsedMrp,
+                price:parsedPrice, 
                 images:optImgs,
                 category:category,
-                inStock:inStock,
+                inStock:parsedStock,
                 storeId:storeId,
                 
             }

@@ -2,8 +2,12 @@
 import { useEffect, useState } from "react"
 import Loading from "@/components/Loading"
 import { orderDummyData } from "@/assets/assets"
+import toast from "react-hot-toast"
+import axios from "axios"
+import { useAuth } from "@clerk/nextjs"
 
 export default function StoreOrders() {
+    const {getToken}=useAuth();
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedOrder, setSelectedOrder] = useState(null)
@@ -11,13 +15,40 @@ export default function StoreOrders() {
 
 
     const fetchOrders = async () => {
-       setOrders(orderDummyData)
-       setLoading(false)
+        try{
+            const token=await getToken();
+
+            const {data}=await axios.get("/api/store/orders",{
+                headers:{Authorization:`Bearer ${token}`}
+            });
+            setOrders(data.orders);
+        }catch(error){
+            console.log("Error in fetching orders in orders page");
+            console.log(error);
+            toast.error("Error in fetching orders");
+        }finally{
+            setLoading(false);
+        }
     }
 
     const updateOrderStatus = async (orderId, status) => {
         // Logic to update the status of an order
+        try{
+            const token=await getToken();
 
+            const {data}=await axios.get("/api/store/orders",{orderId,status},{
+                headers:{Authorization:`Bearer ${token}`}
+            });
+
+            setOrders(prev=>prev.map(order=>order.id===orderId ? {...order,status} : order));
+            toast.success("Order status updated");
+
+        }catch(error){
+            
+            console.log("Error in updating orders' status in orders page");
+            console.log(error);
+            toast.error("Error in updating status");
+        }
 
     }
 

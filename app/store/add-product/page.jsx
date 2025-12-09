@@ -2,10 +2,13 @@
 import { assets } from "@/assets/assets"
 import Image from "next/image"
 import { useState } from "react"
-import { toast } from "react-hot-toast"
+import toast from "react-hot-toast"
+import { useAuth } from "@clerk/nextjs";
+import axios from "axios"
 
 export default function StoreAddProduct() {
 
+    const {getToken}=useAuth();
     const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Beauty & Health', 'Toys & Games', 'Sports & Outdoors', 'Books & Media', 'Food & Drink', 'Hobbies & Crafts', 'Others']
 
     const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null })
@@ -26,6 +29,47 @@ export default function StoreAddProduct() {
     const onSubmitHandler = async (e) => {
         e.preventDefault()
         // Logic to add a product
+        try{
+            if(!images[1] && !images[2] && !images[3] && !images[4])
+                return toast.error("Please upload an image");
+
+            const token=await getToken();
+            const formData = new FormData();
+
+            // Prepare product JSON fields
+            formData.append("data", JSON.stringify(productInfo));
+
+            // Append images
+            const imageArray = Object.values(images).filter(Boolean);
+
+            imageArray.forEach((img) => {
+                formData.append("images", img);
+            });
+            const {data}=await axios.post("/api/store/product",formData,{
+                headers:{Authorization:`Bearer ${token}`,
+                "Content-Type": "multipart/form-data"},
+            });
+
+            //console.log(data.prodcut);
+            toast.success("Product added successfully");
+
+            setProductInfo({
+                name: "",
+                description: "",
+                mrp: 0,
+                price: 0,
+                category: "",
+            });
+            setImages({
+                1: null, 2: null, 3: null, 4: null
+            });
+        }catch(error){
+            console.log("Error in adding product page");
+            console.log(error);
+            toast.error("Error in adding product");
+        }finally{
+            setLoading(false);
+        }
         
     }
 
